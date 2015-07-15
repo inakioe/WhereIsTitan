@@ -4,7 +4,7 @@ Created on Mon Jun  8 09:57:38 2015
 
 @author: Inaki Ordonez-Etxeberria
 
-Script to determine the position of Titan in order to help the observation to the IDS Proposal SI2015a02 
+Script to determine the coordinates of Titan in order to help the observation to the IDS Proposal SI2015a02 
 """
 print 'The script shows the possition of Titan in order to help' 
 print 'with the observation of IDS Proposal SI2015a02'
