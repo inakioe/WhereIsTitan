@@ -2,9 +2,9 @@
 """
 Created on Mon Jun  8 09:57:38 2015
 
-@author: Inaki Ordonez-Etxeberria
+@author: inaki
 
-Script to determine the coordinates of Titan in order to help the observation to the IDS Proposal SI2015a02 
+Script to determine the position of Titan in order to help the observation to the IDS Proposal SI2015a02 
 """
 print 'The script shows the possition of Titan in order to help' 
 print 'with the observation of IDS Proposal SI2015a02'
@@ -12,7 +12,35 @@ print 'USAGE: python WhereIsTitan.py ["YYYY/MM/DD hh:mm:ss"]'
 import ephem
 import sys
 import numpy as np
+from math import degrees, cos, sin, pi, atan
 
+def ParallacticAngle(AR, DEC, lat = '28.775867', lon =  '-17.89733', date = 'now'):
+    # Definition of the observatory place
+    observatory = ephem.Observer()
+    observatory.lon = str(lon)
+    observatory.lat = str(lat)
+    if date  ==  'now':
+        observatory.date = ephem.now()
+    else:
+        observatory.date = ephem.Date(date)
+    
+    # Definition of the target
+    target = ephem.Equatorial(AR, DEC, epoch = ephem.J2000)
+    # Computing the target from and observation point and moment.
+    body = ephem.FixedBody()
+    body._ra = target.ra
+    body._dec = target.dec
+    body._epoch = target.epoch
+    body.compute(observatory)
+    
+    # Determining the parallactic_angle()
+    #ParaAngle = body.parallactic_angle()
+    # Just if there is some problem with this attribute in ephem, try:
+    HA=observatory.sidereal_time()- target.ra
+    ParaAngle=atan(cos(observatory.lat)*sin(HA) / (sin(observatory.lat)*cos(DEC) - cos(observatory.lat)*sin(DEC)*cos(HA)))
+    if ParaAngle < 0:
+        ParaAngle += (2 * pi)
+    return degrees(ParaAngle)#, degrees(body.az), degrees(body.alt)
 
 def Rad2DegRA(ang):
     #To convert radian RA in to hh mm ss
@@ -47,8 +75,8 @@ if date  ==  'now':
 else:
     observatory.date = ephem.Date(date)
 print '                                                                         Saturn '     
-print ' Date     Time(UTC)     RA          DEC                  AZ      ALT    distance|size' 
-print '                                                                        (arcsec)' 
+print ' Date     Time(UTC)     RA          DEC                  AZ      ALT    distance Air   Parallactic ' 
+print '                                                                        (arcsec) mass     angle' 
 #Selecting Titan and Saturn
 titan = ephem.Titan()
 saturn = ephem.Saturn()
@@ -82,12 +110,14 @@ for i in xrange(0,12):
         cS = chr(27)+"[5;36m" #defininng color red
     else:
         cS =  chr(27)+"[0;98m"
-    [Ti_RaD,Ti_RaM,Ti_RaS] = Rad2DegRA(titan.ra) #Converts radians in hours.
-    [Ti_DecD,Ti_DecM,Ti_DecS]= Rad2DegDec(titan.dec) #Converts radians in degrees.
+    [Ti_RaD,Ti_RaM,Ti_RaS] = Rad2DegRA(titan.a_ra) #Converts radians in hours.
+    [Ti_DecD,Ti_DecM,Ti_DecS]= Rad2DegDec(titan.a_dec) #Converts radians in degrees.
+
+    ParaAng=ParallacticAngle(titan.a_ra, titan.a_dec, lat = '28.775867', lon =  '-17.89733', date = date)
     print cW, observatory.date, ': ', "%02d"%Ti_RaD, "%02d"%Ti_RaM, "%05.2f"%round(Ti_RaS,2),\
         "%02d"%Ti_DecD, "%02d"%Ti_DecM, "%05.2f"%round(Ti_DecS,2),'J2000  ',\
         "%06.2f"%round(titan.az*180/np.pi,2), cR, "%06.2f"%round(titan.alt*180/np.pi,2), cW, \
-        cS, "%06.2f"%round(separation,2),cW, "%03.1f"%round(saturn.size,1) 
+        cS, "%06.2f"%round(separation,2),cW, str(round(1/(np.cos((np.pi/2)-titan.alt)),1)),'\t', "%06.2f"%(round(ParaAng,2))
     date= str(ephem.Date(date2))
 print ""
 print "ALT in",chr(27)+"[0;31m", "RED:",chr(27)+"[0m", "out of the limit of the INT telescope."
@@ -99,4 +129,6 @@ print "1.- Solar analog before observation: LAND107-684 15 37 18.1 -00 09 50 J20
 print "2.- Solar analog after observation:  HD144585 16 07 03.3 -14 04 17 J2000 m=6.3"
 print "3.- Find a suitable Spectrophotometric Standard Star at the same airmass"
 print ""
+    
+
     
