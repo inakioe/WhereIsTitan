@@ -117,7 +117,7 @@ for i in xrange(0,12):
     print cW, observatory.date, ': ', "%02d"%Ti_RaD, "%02d"%Ti_RaM, "%05.2f"%round(Ti_RaS,2),\
         "%02d"%Ti_DecD, "%02d"%Ti_DecM, "%05.2f"%round(Ti_DecS,2),'J2000  ',\
         "%06.2f"%round(titan.az*180/np.pi,2), cR, "%06.2f"%round(titan.alt*180/np.pi,2), cW, \
-        cS, "%06.2f"%round(separation,2),cW, str(round(1/(np.cos((np.pi/2)-titan.alt)),1)),'\t', "%06.2f"%(round(ParaAng,2))
+        cS, "%06.2f"%round(separation,2),cW, str(abs(round(1/(np.cos((np.pi/2)-titan.alt)),1))),'\t', "%06.2f"%(round(ParaAng,2))
     date= str(ephem.Date(date2))
 print ""
 print "ALT in",chr(27)+"[0;31m", "RED:",chr(27)+"[0m", "out of the limit of the INT telescope."
